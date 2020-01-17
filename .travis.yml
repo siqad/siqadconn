@@ -1,0 +1,16 @@
+language: python
+
+jobs:
+  include:
+    - os: windows
+      language: shell
+      before_install:
+        - choco install python --version 3.8.0
+        - choco install swig
+        - export PATH="/c/Python38:/c/Python38/Scripts:$PATH"
+
+  install:
+    - python -m pip install cibuildwheel==1.1.0 cmake scikit-build
+
+  script:
+    -python -m cibuildwheel --output-dir wheelhouse
