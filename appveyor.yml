@@ -1,0 +1,54 @@
+image:
+  - Visual Studio 2017
+environment:
+
+  BOOST_ROOT: C:\Libraries\boost_1_69_0
+
+  matrix:
+
+    # For Python versions available on Appveyor, see
+    # https://www.appveyor.com/docs/windows-images-software/#python
+    # The list here is complete (excluding Python 2.6, which
+    # isn't covered by this document) at the time of writing.
+
+    - PYTHON: "C:\\Python35"
+      BOOST_LIBRARYDIR: C:\Libraries\boost_1_69_0\lib32-msvc-14.1
+    - PYTHON: "C:\\Python36"
+      BOOST_LIBRARYDIR: C:\Libraries\boost_1_69_0\lib32-msvc-14.1
+    - PYTHON: "C:\\Python37"
+      BOOST_LIBRARYDIR: C:\Libraries\boost_1_69_0\lib32-msvc-14.1
+    - PYTHON: "C:\\Python38"
+      BOOST_LIBRARYDIR: C:\Libraries\boost_1_69_0\lib32-msvc-14.1
+    - PYTHON: "C:\\Python35-x64"
+      BOOST_LIBRARYDIR: C:\Libraries\boost_1_69_0\lib64-msvc-14.1
+    - PYTHON: "C:\\Python36-x64"
+      BOOST_LIBRARYDIR: C:\Libraries\boost_1_69_0\lib64-msvc-14.1
+    - PYTHON: "C:\\Python37-x64"
+      BOOST_LIBRARYDIR: C:\Libraries\boost_1_69_0\lib64-msvc-14.1
+    - PYTHON: "C:\\Python38-x64"
+      BOOST_LIBRARYDIR: C:\Libraries\boost_1_69_0\lib64-msvc-14.1
+
+cache:
+  - C:\ProgramData\chocolatey\bin -> appveyor.yml
+  - C:\ProgramData\chocolatey\lib -> appveyor.yml
+
+install:
+  - choco install swig ninja
+  - "%PYTHON%\\python.exe -m pip install scikit-build"
+
+build: off
+
+test_script:
+  - "%PYTHON%\\python.exe setup.py test"
+
+after_test:
+  - "%PYTHON%\\python.exe setup.py bdist_wheel"
+
+artifacts:
+  # bdist_wheel puts the built wheel in the dist directory
+  - path: dist\*
+
+#on_success:
+#  You can use this step to upload your artifacts to a public website.
+#  See Appveyor's documentation for more details. Or you can simply
+#  access your wheels from the Appveyor "artifacts" tab for your build.

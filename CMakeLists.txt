@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
 
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12")
+    cmake_policy(SET CMP0074 NEW)
+endif()
+
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.13")
     cmake_policy(SET CMP0078 OLD)
 endif()
@@ -29,11 +33,16 @@ set_property(SOURCE src/siqadconn.i PROPERTY CPLUSPLUS ON)
 
 
 # build the SWIG src and C++ code
-# TODO figure out why TYPE STATIC compiles but doesn't work in practice (can't import _siqadconn)
+
 #swig_add_library(siqadconn TYPE STATIC LANGUAGE python SOURCES src/siqadconn.i src/siqadconn.cc)
 swig_add_library(siqadconn LANGUAGE python SOURCES src/siqadconn.i src/siqadconn.cc)
 
-swig_link_libraries(siqadconn ${PYTHON_LIBRARIES} ${Boost_LIBRARIES})
+# TODO link PYTHON for Windows, don't link for Linux
+if (WIN32)
+    swig_link_libraries(siqadconn ${PYTHON_LIBRARIES} ${Boost_LIBRARIES})
+else()
+    swig_link_libraries(siqadconn ${Boost_LIBRARIES})
+endif()
 
 install(TARGETS ${SWIG_MODULE_siqadconn_REAL_NAME} 
         DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/../cmake-install/siqadtools)
