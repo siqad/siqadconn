@@ -1,8 +1,6 @@
 language: python
-
 services:
   - docker
-
 before_install:
   - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
   - sudo add-apt-repository -y ppa:ubuntu-sdk-team/ppa
@@ -12,16 +10,16 @@ before_install:
   - python3 setup.py sdist -d docker-build
   - docker build -t siqad/siqadtools docker-build
   - docker ps -a
-
 script:
-  - docker run -u root --entrypoint=/bin/sh --rm -i -v ${TRAVIS_BUILD_DIR}/wheelhouse:/output siqad/siqadtools -c "ls; ls wheelhouse; cp wheelhouse/* /output; ls /output"
+  - docker run -u root --entrypoint=/bin/sh --rm -i -v ${TRAVIS_BUILD_DIR}/wheelhouse:/output
+    siqad/siqadtools -c "ls; ls wheelhouse; cp wheelhouse/* /output; ls /output"
   - docker ps -a
   - zip -r wheelhouse.zip wheelhouse
 deploy:
   provider: releases
   api_key:
-    secure: Ckuaavh64vpBm9AHv+rgLNwdM6z4Op8C6CAJvSeC6pnmOvgOtfpmo27Y0cDdm0eEhuejbJrXg8PSr4LaeuBQBALLmhlVVvAVF/7So4Vy33WYYrAOfY6kDCKiT6L6LcvafzdlLf4+hGV5ek64ovPLH53WoDCqwKX0dvTL1j+IunZF7Rw+vEZ3muUG+OVvvoF1zUaiZ7+wd/vZvyNc6ScRy7VJOrNR+QX0NyiA2cirHAjAANh9l3czfRqUIYSc4CnR/oaK+G9OqZj/YFDdRIlM5IPsW+0qguQ67WWaBzPRhRuvgH8bfUi0HbXTZrv2fkY+jmeLq5WACKNuqui41lmtf/eMO3IjPr1Vmug67SRVhkkZJN4ma2kj9kWAusN1riupzJyTeYVcQ+Uhjzt7hpL/FT88yqXHEgDaU3eYcgpSHm0AaV559vi9gkDEyyoTtL0veaoND3vyx+Smq8VCAp8ZGQkeqRJ5QWu2HLlGoEKbd789JsJNQTmmhtDV/yNEDBsleVPzi6T1JDmCsghQCmxcxor2OBO73tR7ja/ptmIl3NRekx2b7ek4dEfzy01t0vuPQp/GM9PAjlXq6wko3Y1pK1/jnjTM1B5aI60Hhe0PX/Fepx1uqMnQseCpDs2Nf/Xy8A32uQT/FQW4EhrbPDPB7Fvsh77AYn0qLW7MAzKAXFY=
-  file: wheelhouse.zip
+    secure: o4z9VJ29PGyPK1LYxuINIXzGAEXIf58MT3ot9f2UoUhjAtIPOAPQXIMCkVq0N6XOSMAMsET++vhoiZ2RCvDzmSjGWHMVn9ow0tnUww+SbgM2x+o+RS9TGc0hM9qNzXX6FA7nvcqrvO1CjTDEbpyW5j3fIEJTwQrtzKNLvIKmOHxc6Yq/v/ei2lK1JSfo9HYqkkSFYHAUJZa2QmfCOyEqETzcKoUDSI0M6p0Sekc1kU/QHXr3lPkORy5tBCqerLDXBctsLCRuC6bNcOCgOhyWwj98wzeTTeZgzSMnI7x04HB67gPUrvP3vtnHElbn/UrsgLGl3hCzUHhsdSbfWVFa4rewclH6E/OWi6h0ylzRZSDpgLy6L8Rvvaczh4m+mAXYWaYp9jYsMW7dNKb0RJPOofYbsJfDBzh8aHlasVZOQoJkGkwQii+1hrwOwQ29ZNNOweD11mM9br5lSKHFgmKYJGf0CK6Z0PVZFrEsAL0cAVeiFRcm46HW0IxBrtG9eZrf7N0WQWbe9sjMCseCKdeGwI2JBNUjVP+d9vgBD1HDBTo+u8qrU5ABysFtegGYi4z8J+KXhvuAAWG0OLlXPBDk3UD22xjblElHUTCYCqQavnF+XAuOxhAg3iydV7Y8NB2xj7UFA5j0mgaWG1k3jmbMsRWUnCB8n1YeLiGCbHlFewQ=
+  file: 'wheelhouse.zip'
   skip_cleanup: true
   draft: true
   on:
