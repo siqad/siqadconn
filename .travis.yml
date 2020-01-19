@@ -11,8 +11,7 @@ before_install:
   - docker build -t siqad/siqadtools docker-build
   - docker ps -a
 script:
-  - docker run -u root --entrypoint=/bin/sh --rm -i -v ${TRAVIS_BUILD_DIR}/wheelhouse:/output
-    siqad/siqadtools -c "ls; ls wheelhouse; cp wheelhouse/* /output; ls /output"
+  - docker run -u root --entrypoint=/bin/sh --rm -i -v ${TRAVIS_BUILD_DIR}/wheelhouse:/output siqad/siqadtools -c "cp dist/* /output"
   - docker ps -a
   - zip -r wheelhouse.zip wheelhouse
 deploy:
