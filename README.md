@@ -1,44 +1,79 @@
-# SiQAD Connector
+# SiQADConnector
 
-SiQAD Connector is a class containing convenient functions for physics engines to interact with the SiQAD GUI. The use of the class is recommended, but ultimately optional as developers may want to implement their own I/O with SiQAD. A Python wrapper generated using [SWIG](http://www.swig.org/) has also been included. Note that SiQAD Connector uses Apache License 2.0 as opposed to the GUI's LGPLv3 in order to allow physics engines to use any license compatible with APLv2.
+SiQADConnector is a class containing convenient functions for physics engines to interact with the SiQAD GUI. The use of the class is recommended, but ultimately optional as developers may want to implement their own I/O with SiQAD. A Python wrapper generated using [SWIG](http://www.swig.org/) is also been included. Note that SiQADConnector uses Apache License 2.0 as opposed to the GUI's LGPLv3 in order to allow physics engines to use any license compatible with APLv2.
 
-Please keep in mind that SiQAD is still undergoing rapid development, there are no guarantees that older versions of SiQAD Connector would be compatible with newer versions of the SiQAD GUI.
+Please keep in mind that SiQAD is still undergoing rapid development. Compatibility is not guaranteed across SiQADConnector and SiQAD versions.
 
-## Usage
 
-### C++ projects
+## Installation for Python Projects
 
-Just copy `siqadconn.cc` and `siqadconn.h` to your project directory and include `siqadconn.h` appropriately.
+### Pre-compiled Wheels
 
-TODO: sample code.
+We compile wheels targeting Python versions 3.5 to 3.8 on Linux and Windows. Compiled binaries for macOS are planned for the future.
 
-### Python projects
+Currently, the easiest way to acquire SiQADConnector is through PIP (or your preferred Python package manager) from our testing repository:
 
-There are various ways to acquire a Python wrapper for SiQAD Connector (read the subsections below). After acquiring `siqadconn.py` and `_siqadconn.so` (Linux) or `_siqadconn.pyd` (Windows), copy them to your Python project folder, import siqadconn, and use the SiQADConnector class.
+```
+# Substitute pip with the appropriate command for your platform, e.g. pip3, python3 -m pip, etc.
+pip install -i https://test.pypi.org/simple/ siqadtools
+```
 
-TODO sample code.
+We will eventually move this from [TestPyPI](https://test.pypi.org/) to the proper [PyPI](https://pypi.org/).
 
-#### Use pre-compiled binaries
+You may also download compiled wheels here: TODO add link, and install them through PIP or your preferred Python package manager.
 
-TODO upload pre-compiled Linux, macOS and Windows binaries.
+To uninstall, run
+```
+# Substitute pip with the appropriate command for your platform
+pip uninstall siqadtools
+```
 
-#### Using setup.py
+### Compiling the Wheel from Source
 
-TODO list dependencies. Off the top of my head: from apt `boost` and `swig`, from pip3 `scikit-build`
+#### Ubuntu 18.04 LTS
 
-You may use the provided `setup.py` which uses the distutil library to build the wrapper. Using your preferred Python interpretor (here we use `python3`), run
+Install dependencies (packages listed are for Ubuntu 18.04 LTS, please adapt to your distribution):
+
+```
+apt-get install swig libboost libboost-dev cmake
+pip3 install scikit-build
+```
+
+Run the `setup.py` script:
+
 ```
 python3 setup.py bdist_wheel
 ```
-which creates a Python wrapper of SiQADConnector via SWIG, compiles SiQADConnector, and packages the generated files into a proper Python package in the `dist` directory.
 
-You should now find `siqadtools-[version]-[platform_info].whl` inside the `dist` directory. Install this into your system by running
-```
-pip3 install siqadtools-[version]-[platform_info].whl
-```
-substituting `pip3` with your preferred Python package manager, `[version]` and `[platform_info]` with what you see in the generated wheel file.
+Here, `bdist_wheel` instructs the script to package the compiled package into a wheel for you to install. The compiled wheel is deposited into the `dist` subdirectory from where you run the script. Install the wheel on your system using your preferred Python package manager, e.g. `pip`.
 
 To uninstall, run
 ```
 pip3 uninstall siqadtools
 ```
+
+##### Windows
+
+We use AppVeyor, a CI service which has Windows build support, to compile SiQADConnector wheels for distribution on the Windows system. Please refer to our [AppVeyor configuration file](appveyor.yml) for our configurations and setup, and adapt to your environment.
+
+
+
+
+## Usage
+
+### C++ projects
+
+Either copy `siqadconn.cc` and `siqadconn.h` to your project directory and include `siqadconn.h` appropriately, or add this repository to your project as a submodule and include `siqadconn.h` as needed.
+
+Usage examples will be included in the future. In the meantime, please refer to [SimAnneal's usage](https://github.com/samuelngsh/simanneal-sidb/blob/master/interface.cc) for some examples.
+
+### Python projects
+
+Import SiQADConnector by:
+
+```
+from siqadtools import siqadconn
+```
+
+See [ExhaustiveGS](https://github.com/samuelngsh/exhaustive-gs-sidb) and [PoisSolvers](https://github.com/NathanChiu/PoisSolvers) for some usage examples of SiQADConnector in Python projects.
+
