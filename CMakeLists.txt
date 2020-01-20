@@ -21,23 +21,21 @@ find_package(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
 include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    .
+    src
+    swig
 )
 set(CMAKE_SWIG_FLAGS "")
 
-set_property(SOURCE src/siqadconn.i PROPERTY CPLUSPLUS ON)
-#set_property(TARGET ${SWIG_MODULE_siqadconn_REAL_NAME} PROPERTY SWIG_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})
-#set_property(SOURCE src/siqadconn.cc PROPERTY SWIG_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})
-#set_source_files_properties(src/siqadconn.i PROPERTIES SWIG_FLAGS "-includeall")
+set_property(SOURCE swig/siqadconn.i PROPERTY CPLUSPLUS ON)
+file(COPY swig/__init__.py DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/swig")
+#set_source_files_properties(swig/siqadconn.i PROPERTIES SWIG_FLAGS "-includeall")
 
 
 # build the SWIG src and C++ code
+swig_add_library(siqadconn LANGUAGE python SOURCES swig/siqadconn.i src/siqadconn.cc)
 
-#swig_add_library(siqadconn TYPE STATIC LANGUAGE python SOURCES src/siqadconn.i src/siqadconn.cc)
-swig_add_library(siqadconn LANGUAGE python SOURCES src/siqadconn.i src/siqadconn.cc)
-
-# TODO link PYTHON for Windows, don't link for Linux
+# link PYTHON for Windows, don't link for Linux
 if (WIN32)
     swig_link_libraries(siqadconn ${PYTHON_LIBRARIES} ${Boost_LIBRARIES})
 else()
@@ -47,5 +45,5 @@ endif()
 install(TARGETS ${SWIG_MODULE_siqadconn_REAL_NAME} 
         DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/../cmake-install/siqadtools)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/siqadconn.py 
-              ${CMAKE_CURRENT_SOURCE_DIR}/src/__init__.py
+              ${CMAKE_CURRENT_SOURCE_DIR}/swig/__init__.py
         DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/../cmake-install/siqadtools)

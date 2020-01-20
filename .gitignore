@@ -3,3 +3,4 @@
 /_skbuild
 /dist
 *.tar.gz
+*.egg-info
