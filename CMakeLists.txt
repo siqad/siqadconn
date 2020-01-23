@@ -8,6 +8,20 @@ if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.13")
     cmake_policy(SET CMP0078 OLD)
 endif()
 
+
+# install paths
+if(SKBUILD)
+    set(SIQADCONN_SWIG_MODULE_DEST ${CMAKE_CURRENT_BINARY_DIR}/../cmake-install/siqadtools)
+    set(SIQADCONN_PY_DEST ${CMAKE_CURRENT_BINARY_DIR}/../cmake-install/siqadtools)
+elseif(DEFINED SIQADCONN_ROOT)
+    set(SIQADCONN_SWIG_MODULE_DEST ${SIQADCONN_ROOT})
+    set(SIQADCONN_PY_DEST ${SIQADCONN_ROOT})
+else()
+    set(SIQADCONN_SWIG_MODULE_DEST ${CMAKE_CURRENT_BINARY_DIR}/siqadtools)
+    set(SIQADCONN_PY_DEST ${CMAKE_CURRENT_BINARY_DIR}/siqadtools)
+endif()
+
+
 #set_property(TARGET ${SWIG_MODULE_siqadconn_REAL_NAME} PROPERTY CXX_STANDARD_REQUIRED 11)
 add_definitions(-Wall -g -std=c++11)
 
@@ -43,7 +57,7 @@ else()
 endif()
 
 install(TARGETS ${SWIG_MODULE_siqadconn_REAL_NAME} 
-        DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/../cmake-install/siqadtools)
+        DESTINATION ${SIQADCONN_SWIG_MODULE_DEST})
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/siqadconn.py 
               ${CMAKE_CURRENT_SOURCE_DIR}/swig/__init__.py
-        DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/../cmake-install/siqadtools)
+              DESTINATION ${SIQADCONN_PY_DEST})
