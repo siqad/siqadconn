@@ -1,7 +1,7 @@
 // @file:     siqadconn.cc
 // @author:   Samuel
 // @created:  2017.08.23
-// @editted:  2020.01.10 - Samuel
+// @editted:  2020.01.28 - Samuel
 // @license:  Apache License 2.0
 //
 // @desc:     Convenient functions for interacting with SiQAD
@@ -39,6 +39,12 @@ SiQADConnector::SiQADConnector(const std::string &eng_name,
 
   // read problem from input_path
   readProblem(input_path);
+}
+
+SiQADConnector::~SiQADConnector()
+{
+  if (output_path != "")
+    writeResultsXml();
 }
 
 void SiQADConnector::setExport(std::string type, std::vector< std::pair< std::string, std::string > > &data_in)
@@ -81,7 +87,7 @@ void SiQADConnector::addSQCommand(SQCommand *command)
 // parse problem XML, return true if successful
 void SiQADConnector::readProblem(const std::string &path)
 {
-  std::cout << "Reading problem file: " << input_path << std::endl;
+  debugStream << "Reading problem file: " << input_path << std::endl;
 
   boost::property_tree::ptree tree; // create empty property tree object
   boost::property_tree::read_xml(path, tree, boost::property_tree::xml_parser::no_comments); // parse the input file into property tree
@@ -271,9 +277,12 @@ void SiQADConnector::readDBDot(const boost::property_tree::ptree &subtree, const
 
 void SiQADConnector::writeResultsXml()
 {
+  if (output_path == "")
+    throw std::invalid_argument("Output path not set.");
+
   boost::property_tree::ptree node_root;
 
-  std::cout << "Write results to XML..." << std::endl;
+  debugStream << "Write results to XML..." << std::endl;
 
   // eng_info
   node_root.add_child("eng_info", engInfoPropertyTree());
@@ -316,7 +325,7 @@ void SiQADConnector::writeResultsXml()
   tree.add_child("sim_out", node_root);
   boost::property_tree::write_xml(output_path, tree, std::locale(), boost::property_tree::xml_writer_make_settings<std::string>(' ',4));
 
-  std::cout << "Write to XML complete." << std::endl;
+  debugStream << "Write to XML complete." << std::endl;
 }
 
 boost::property_tree::ptree SiQADConnector::engInfoPropertyTree()

@@ -1,7 +1,7 @@
 // @file:     siqadconn.h
 // @author:   Samuel
 // @created:  2017.08.23
-// @editted:  2020.01.10 - Samuel
+// @editted:  2020.01.28 - Samuel
 // @license:  Apache License 2.0
 //
 // @desc:     Convenient functions for interacting with SiQAD including
@@ -57,12 +57,9 @@ namespace phys{
   public:
     // CONSTRUCTOR
     SiQADConnector(const std::string &eng_name, const std::string &input_path,
-        const std::string &output_path, const bool &verbose=false);
+        const std::string &output_path="", const bool &verbose=false);
     // DESTRUCTOR
-    ~SiQADConnector()
-    {
-      writeResultsXml();
-    }
+    ~SiQADConnector();
 
     // Write results to the provided output_path
     void writeResultsXml();
