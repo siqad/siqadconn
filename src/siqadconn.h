@@ -362,7 +362,7 @@ namespace phys{
       : action(commandActionEnum(str_action)), item(commandItemEnum(str_item)) {};
 
     // Destructor.
-    ~SQCommand() {};
+    virtual ~SQCommand() {};
 
     // TODO need a way to uniquely reference all items in order to implement
     // movement and removal commands.

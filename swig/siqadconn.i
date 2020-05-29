@@ -7,6 +7,7 @@
 // @desc:     Convenient functions for interacting with SiQAD
 
 %module siqadconn
+#pragma SWIG nowarn=383
 %include <std_pair.i>
 %include <std_vector.i>
 %include <std_string.i>
