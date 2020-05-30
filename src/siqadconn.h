@@ -183,6 +183,7 @@ namespace phys{
     Layer() {};
     std::string name;   // layer name
     std::string type;   // layer type
+    std::string role;   // layer role
     float zoffset=0;    // layer offset from lattice surface
     float zheight=0;    // layer thickness
   };

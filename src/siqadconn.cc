@@ -131,6 +131,8 @@ void SiQADConnector::readLayerProp(const boost::property_tree::ptree &layer_node
   Layer lay;
   lay.name = layer_node.get<std::string>("name");
   lay.type = layer_node.get<std::string>("type");
+  if (layer_node.count("role") != 0)
+    lay.role = layer_node.get<std::string>("role");
   lay.zoffset = layer_node.get<float>("zoffset");
   lay.zheight = layer_node.get<float>("zheight");
 
