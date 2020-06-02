@@ -1,13 +1,15 @@
 cmake_minimum_required(VERSION 3.10)
 
-cmake_policy(SET CMP0086 NEW)
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.14")
+    cmake_policy(SET CMP0086 NEW)
+endif()
 
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12")
     cmake_policy(SET CMP0074 NEW)
 endif()
 
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.13")
-    cmake_policy(SET CMP0078 OLD)
+    cmake_policy(SET CMP0078 NEW)
 endif()
 
 
