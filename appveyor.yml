@@ -85,8 +85,8 @@ after_build:
   - mv dist %DIST_N%
 
 artifacts:
+  - path: .\%DIST_N%
   #- path: libs\siqadconn\%DIST_N%
-  - path: %DIST_N%
 
 #on_success:
 #  You can use this step to upload your artifacts to a public website.
