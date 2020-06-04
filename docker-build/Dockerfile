@@ -1,5 +1,5 @@
 # Resources:
-# Good consilidated guide on required components: https://thomastrapp.com/blog/building-a-pypi-package-for-a-modern-cpp-project/
+# Good consolidated guide on required components: https://thomastrapp.com/blog/building-a-pypi-package-for-a-modern-cpp-project/
 # Project that uses pypa/manylinux and CIs for cross platform compilation: moderngl/moderngl
 
 FROM dockcross/manylinux1-x64:latest as build_x86_64
@@ -20,8 +20,9 @@ RUN cd swig-3.0.12 && ./configure --disable-perl --disable-ruby --disable-csharp
 
 # unpack siqadtools and compile a wheel for each available Python version
 COPY siqadtools-*.tar.gz siqadtools.tar.gz
-RUN tar --strip-components=1 -zxvf siqadtools.tar.gz
-RUN ls /opt/python/
+#RUN tar --strip-components=1 -zxvf siqadtools.tar.gz
+RUN tar -zxvf siqadtools.tar.gz
+#RUN ls /opt/python/
 RUN /opt/python/cp35-cp35m/bin/python setup.py bdist_wheel && auditwheel repair dist/*.whl && rm dist/*.whl
 RUN /opt/python/cp36-cp36m/bin/python setup.py bdist_wheel && auditwheel repair dist/*.whl && rm dist/*.whl
 RUN /opt/python/cp37-cp37m/bin/python setup.py bdist_wheel && auditwheel repair dist/*.whl && rm dist/*.whl
@@ -45,8 +46,9 @@ RUN cd swig-3.0.12 && ./configure --disable-perl --disable-ruby --disable-csharp
 
 # unpack siqadtools and compile a wheel for each available Python version
 COPY siqadtools-*.tar.gz siqadtools.tar.gz
-RUN tar --strip-components=1 -zxvf siqadtools.tar.gz
-RUN ls /opt/python/
+#RUN tar --strip-components=1 -zxvf siqadtools.tar.gz
+RUN tar -zxvf siqadtools.tar.gz
+#RUN ls /opt/python/
 RUN /opt/python/cp35-cp35m/bin/python setup.py bdist_wheel && auditwheel repair dist/*.whl && rm dist/*.whl
 RUN /opt/python/cp36-cp36m/bin/python setup.py bdist_wheel && auditwheel repair dist/*.whl && rm dist/*.whl
 RUN /opt/python/cp37-cp37m/bin/python setup.py bdist_wheel && auditwheel repair dist/*.whl && rm dist/*.whl

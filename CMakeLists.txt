@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
+project(siqadtools)
+
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.14")
     cmake_policy(SET CMP0086 NEW)
 endif()
