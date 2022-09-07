@@ -1,7 +1,7 @@
 // @file:     siqadconn.cc
 // @author:   Samuel
 // @created:  2017.08.23
-// @editted:  2020.01.28 - Samuel
+// @editted:  2022.09.07 - Samuel
 // @license:  Apache License 2.0
 //
 // @desc:     Convenient functions for interacting with SiQAD
@@ -99,7 +99,9 @@ void SiQADConnector::readProblem(const std::string &path)
 
   // read simulation parameters
   debugStream << "Read simulation parameters" << std::endl;
-  readSimulationParam(tree.get_child("siqad.sim_params"));
+  if(tree.count("siqad.sim_params") > 0) {
+    readSimulationParam(tree.get_child("siqad.sim_params"));
+  }
 
   // read layer properties
   debugStream << "Read layer properties" << std::endl;
@@ -258,14 +260,20 @@ void SiQADConnector::readDBDot(const boost::property_tree::ptree &subtree, const
   float x, y;
   int n, m, l;
 
-  // read x and y physical locations
-  x = subtree.get<float>("physloc.<xmlattr>.x");
-  y = subtree.get<float>("physloc.<xmlattr>.y");
-
   // read n, m and l lattice coordinates
   n = subtree.get<int>("latcoord.<xmlattr>.n");
   m = subtree.get<int>("latcoord.<xmlattr>.m");
   l = subtree.get<int>("latcoord.<xmlattr>.l");
+
+  // read x and y physical locations
+  if(subtree.count("physloc.<xmlattr>.x") > 0) {
+    x = subtree.get<float>("physloc.<xmlattr>.x");
+    y = subtree.get<float>("physloc.<xmlattr>.y");
+  } else {
+    // TODO in the future, read from the lattice vector in the XML rather than computing from hard-coded coords
+    x = 3.84 * n;
+    y = 7.68 * m + 2.25 * l;
+  }
 
   agg_parent->dbs.push_back(std::make_shared<DBDot>(x, y, n, m, l));
 
