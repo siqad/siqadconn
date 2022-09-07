@@ -56,7 +56,7 @@ file(COPY swig/__init__.py DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/swig")
 swig_add_library(siqadconn LANGUAGE python SOURCES swig/siqadconn.i src/siqadconn.cc)
 
 # link PYTHON for Windows, don't link for Linux
-if (WIN32)
+if (WIN32 OR APPLE)
     swig_link_libraries(siqadconn ${PYTHON_LIBRARIES} ${Boost_LIBRARIES})
 else()
     swig_link_libraries(siqadconn ${Boost_LIBRARIES})
