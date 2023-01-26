@@ -29,13 +29,7 @@ endif()
 
 
 #set_property(TARGET ${SWIG_MODULE_siqadconn_REAL_NAME} PROPERTY CXX_STANDARD_REQUIRED 11)
-add_definitions(-Wall -g -std=c++11)
-
-find_package(SWIG REQUIRED)
-include(${SWIG_USE_FILE})
-
-find_package(PythonLibs REQUIRED)
-include_directories(${PYTHON_INCLUDE_PATH})
+# add_definitions(-Wall -g -std=c++11)
 
 find_package(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
@@ -45,25 +39,39 @@ include_directories(
     src
     swig
 )
-set(CMAKE_SWIG_FLAGS "")
 
-set_property(SOURCE swig/siqadconn.i PROPERTY CPLUSPLUS ON)
-file(COPY swig/__init__.py DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/swig")
-#set_source_files_properties(swig/siqadconn.i PROPERTIES SWIG_FLAGS "-includeall")
+if(SKBUILD)
+    # Building SWIG version
+    set(CMAKE_SWIG_FLAGS "")
+    find_package(SWIG REQUIRED)
+    include(${SWIG_USE_FILE})
+
+    find_package(PythonLibs REQUIRED)
+    include_directories(${PYTHON_INCLUDE_PATH})
+
+    set_property(SOURCE swig/siqadconn.i PROPERTY CPLUSPLUS ON)
+    file(COPY swig/__init__.py DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/swig")
+    #set_source_files_properties(swig/siqadconn.i PROPERTIES SWIG_FLAGS "-includeall")
 
 
-# build the SWIG src and C++ code
-swig_add_library(siqadconn LANGUAGE python SOURCES swig/siqadconn.i src/siqadconn.cc)
+    # build the SWIG src and C++ code
+    swig_add_library(siqadconn LANGUAGE python SOURCES swig/siqadconn.i src/siqadconn.cc)
 
-# link PYTHON for Windows, don't link for Linux
-if (WIN32 OR APPLE)
-    swig_link_libraries(siqadconn ${PYTHON_LIBRARIES} ${Boost_LIBRARIES})
+    # link PYTHON for Windows, don't link for Linux
+    if (WIN32 OR APPLE)
+        swig_link_libraries(siqadconn ${PYTHON_LIBRARIES} ${Boost_LIBRARIES})
+    else()
+        swig_link_libraries(siqadconn ${Boost_LIBRARIES})
+    endif()
+
+    install(TARGETS ${SWIG_MODULE_siqadconn_REAL_NAME} 
+            DESTINATION ${SIQADCONN_SWIG_MODULE_DEST})
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/siqadconn.py 
+                ${CMAKE_CURRENT_SOURCE_DIR}/swig/__init__.py
+                DESTINATION ${SIQADCONN_PY_DEST})
 else()
-    swig_link_libraries(siqadconn ${Boost_LIBRARIES})
+    # Building as C++ library
+    add_library(siqadconn src/siqadconn.cc)
+    target_link_libraries(siqadconn ${Boost_LIBRARIES})
 endif()
 
-install(TARGETS ${SWIG_MODULE_siqadconn_REAL_NAME} 
-        DESTINATION ${SIQADCONN_SWIG_MODULE_DEST})
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/siqadconn.py 
-              ${CMAKE_CURRENT_SOURCE_DIR}/swig/__init__.py
-              DESTINATION ${SIQADCONN_PY_DEST})
