@@ -35,6 +35,9 @@ namespace phys{
   struct DBDot;
   class DBIterator;
   class DBCollection;
+  struct Defect;
+  class DefectIterator;
+  class DefectCollection;
   struct Electrode;
   class ElecIterator;
   class ElectrodeCollection;
@@ -47,6 +50,7 @@ namespace phys{
   class AggregateCommand;
 
   typedef std::vector< std::shared_ptr<DBDot> >::const_iterator DBIter;
+  typedef std::vector< std::shared_ptr<Defect> >::const_iterator DefectIter;
   typedef std::vector< std::shared_ptr<Electrode> >::const_iterator ElecIter;
   typedef std::vector< std::shared_ptr<ElectrodePoly> >::const_iterator ElecPolyIter;
   typedef std::vector< std::shared_ptr<Aggregate> >::const_iterator AggIter;
@@ -93,6 +97,10 @@ namespace phys{
     // across all aggregate levels.
     DBCollection* dbCollection() {return db_col;}
 
+    // Return pointer to defect collection, which allows iteration through
+    // defects across all defect layers.
+    DefectCollection* defectCollection() {return defect_col;}
+
     // Return pointer to Electrode collection, which allows iteration through
     // electrodes across all electrode layers.
     ElectrodeCollection* electrodeCollection() {return elec_col;}
@@ -129,6 +137,7 @@ namespace phys{
     void readElectrode(const boost::property_tree::ptree &, const std::shared_ptr<Aggregate> &);
     void readElectrodePoly(const boost::property_tree::ptree &, const std::shared_ptr<Aggregate> &);
     void readDBDot(const boost::property_tree::ptree &, const std::shared_ptr<Aggregate> &);
+    void readDefect(const boost::property_tree::ptree &, const std::shared_ptr<Aggregate> &);
 
     // Generate property trees for writing
     boost::property_tree::ptree engInfoPropertyTree();
@@ -150,6 +159,7 @@ namespace phys{
     // Iterable collections
     ElectrodeCollection* elec_col;
     DBCollection* db_col;
+    DefectCollection* defect_col;
     ElectrodePolyCollection* elec_poly_col;
 
     // Retrieved items and properties
@@ -231,6 +241,60 @@ namespace phys{
     DBIterator end() {return DBIterator(db_tree_inner, false);}
     std::shared_ptr<Aggregate> db_tree_inner;
   };
+
+
+  // fixed charges
+  struct Defect {
+    bool has_lat_coord;
+    int n, m, l;    // physical anchor in lattice coordinates
+    int w, h;       // lattice coordinate width and height
+    bool has_eucl;
+    float x, y, z;  // physical location in angstrom
+    float charge;   // contained electron charge
+    float eps_r, lambda_tf; // relative permittivity and screening length for this fixed charge
+    Defect(float t_x, float t_y, float t_z, float t_charge, float t_eps_r, float t_lambda_tf)
+      : has_eucl(true), has_lat_coord(false), x(t_x), y(t_y), z(t_z), charge(t_charge), eps_r(t_eps_r),
+        lambda_tf(t_lambda_tf) {};
+    Defect(int t_n, int t_m, int t_l, int t_w, int t_h, float t_charge, float t_eps_r, float t_lambda_tf)
+      : has_eucl(false), has_lat_coord(true), n(t_n), m(t_m), l(t_l), w(t_w), h(t_h), charge(t_charge),
+        eps_r(t_eps_r), lambda_tf(t_lambda_tf) {};
+  };
+
+  // a constant iterator that iterates through all fixed charges in the problem
+  class DefectIterator
+  {
+  public:
+    explicit DefectIterator(std::shared_ptr<Aggregate> root, bool begin=true);
+    DefectIterator& operator++();
+    bool operator==(const DefectIterator &other) {return other.defect_iter == defect_iter;}
+    bool operator!=(const DefectIterator &other) {return other.defect_iter != defect_iter;}
+    std::shared_ptr<Defect> operator*() const {return *defect_iter;}
+
+    void setCollection(DefectCollection *coll) {collection = coll;}
+    DefectCollection *collection;  // needed for python wrapper
+  
+  private:
+    DefectIter defect_iter;    // points tot he current fixed charge
+    std::shared_ptr<Aggregate> curr;      // current working Aggregate
+    std::stack< std::pair<std::shared_ptr<Aggregate>, AggIter> > agg_stack;
+
+    // add a new aggregate pair to the stack
+    void push(std::shared_ptr<Aggregate> agg);
+
+    // pop the aggregate stack
+    void pop();
+  };
+
+  class DefectCollection
+  {
+  public:
+    DefectCollection(std::shared_ptr<Aggregate> defect_in)
+      : defect_tree_inner(defect_in) {};
+    DefectIterator begin() {return DefectIterator(defect_tree_inner);}
+    DefectIterator end() {return DefectIterator(defect_tree_inner, false);}
+    std::shared_ptr<Aggregate> defect_tree_inner;
+  };
+
 
 
   // electrode_poly
@@ -335,6 +399,7 @@ namespace phys{
   public:
     std::vector< std::shared_ptr<Aggregate> > aggs;
     std::vector< std::shared_ptr<DBDot> > dbs;
+    std::vector< std::shared_ptr<Defect> > defects;
     std::vector< std::shared_ptr<Electrode> > elecs;
     std::vector< std::shared_ptr<ElectrodePoly> > elec_polys;
 
