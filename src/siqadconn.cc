@@ -94,6 +94,8 @@ void SiQADConnector::readProblem(const std::string &path)
   boost::property_tree::ptree tree; // create empty property tree object
   boost::property_tree::read_xml(path, tree, boost::property_tree::xml_parser::no_comments); // parse the input file into property tree
 
+  boost::property_tree::ptree siqad_tree = tree.get_child("siqad");
+
   // parse XML
 
   // read program properties
@@ -101,17 +103,22 @@ void SiQADConnector::readProblem(const std::string &path)
 
   // read simulation parameters
   debugStream << "Read simulation parameters" << std::endl;
-  if(tree.count("siqad.sim_params") > 0) {
+  if(siqad_tree.count("sim_params") > 0) {
     readSimulationParam(tree.get_child("siqad.sim_params"));
+    debugStream << "Read simulation parameters complete" << std::endl;
+  } else {
+    debugStream << "No simulation parameters are present" << std::endl;
   }
 
   // read layer properties
   debugStream << "Read layer properties" << std::endl;
-  readLayers(tree.get_child("siqad.layers"));
+  readLayers(siqad_tree.get_child("layers"));
+  debugStream << "Read layer properties complete" << std::endl;
 
   // read items
   debugStream << "Read items tree" << std::endl;
-  readDesign(tree.get_child("siqad.design"), item_tree);
+  readDesign(siqad_tree.get_child("design"), item_tree);
+  debugStream << "Read items tree complete" << std::endl;
 }
 
 void SiQADConnector::readProgramProp(const boost::property_tree::ptree &program_prop_tree)
