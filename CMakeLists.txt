@@ -73,5 +73,7 @@ else()
     # Building as C++ library
     add_library(siqadconn src/siqadconn.cc)
     target_link_libraries(siqadconn ${Boost_LIBRARIES})
+    set_property(TARGET siqadconn PROPERTY CXX_STANDARD 11)
+    set_property(TARGET siqadconn PROPERTY CXX_STANDARD_REQUIRED True)
 endif()
 
