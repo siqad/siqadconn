@@ -31,6 +31,7 @@ namespace phys{
   //namespace bpt = boost::property_tree;
 
   // forward declaration
+  struct LatticeVector;
   struct Layer;
   struct DBDot;
   class DBIterator;
@@ -186,6 +187,15 @@ namespace phys{
   };
 
 
+  // lattice struct
+  struct LatticeVector {
+    std::string name;  // lattice name
+    std::vector< std::pair<float, float> > atoms;  // atom locations
+    std::pair<float, float> a1, a2;  // lattice vectors
+
+    bool isValid() {return atoms.size() > 0 && (a1.first != 0 || a1.second != 0) && (a2.first != 0 || a2.second != 0);}
+  };
+
   // layer struct
   struct Layer {
     Layer(std::string name, std::string type, float zoffset, float zheight)
@@ -194,6 +204,7 @@ namespace phys{
     std::string name;   // layer name
     std::string type;   // layer type
     std::string role;   // layer role
+    LatticeVector lat_vec;  // lattice
     float zoffset=0;    // layer offset from lattice surface
     float zheight=0;    // layer thickness
   };

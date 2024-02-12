@@ -147,6 +147,46 @@ void SiQADConnector::readLayerProp(const boost::property_tree::ptree &layer_node
   lay.zoffset = layer_node.get<float>("zoffset");
   lay.zheight = layer_node.get<float>("zheight");
 
+  debugStream << "Read layer " << lay.name << " of type " << lay.type << std::endl;
+
+  boost::optional<const boost::property_tree::ptree&> lat_vec_node = layer_node.get_child_optional("lat_vec");
+
+  if (lat_vec_node) {
+    debugStream << "\tRead lattice vector for layer " << lay.name << std::endl;
+    auto lat_vec = *lat_vec_node;
+    boost::optional<std::string> name = lat_vec.get_optional<std::string>("name");
+    if (name) {
+      lay.lat_vec.name = *name;
+    }
+    lay.lat_vec.a1 = std::pair<float, float>(
+      lat_vec.get<float>("a1.<xmlattr>.x"),
+      lat_vec.get<float>("a1.<xmlattr>.y")
+    );
+    lay.lat_vec.a2 = std::pair<float, float>(
+      lat_vec.get<float>("a2.<xmlattr>.x"),
+      lat_vec.get<float>("a2.<xmlattr>.y")
+    );
+    for (auto &child : *lat_vec_node) {
+      // check if the child's name starts with "b"
+      if (child.first.compare(0, 1, "b") == 0) {
+        lay.lat_vec.atoms.push_back(
+          std::pair<float, float>(
+            child.second.get<float>("<xmlattr>.x"),
+            child.second.get<float>("<xmlattr>.y")
+          )
+        );
+      }
+    }
+    debugStream << "\tLattice vector for layer " << lay.name << " read" << std::endl;
+    debugStream << "\t\tname: " << lay.lat_vec.name << std::endl;
+    debugStream << "\t\ta1: " << lay.lat_vec.a1.first << ", " << lay.lat_vec.a1.second << std::endl;
+    debugStream << "\t\ta2: " << lay.lat_vec.a2.first << ", " << lay.lat_vec.a2.second << std::endl;
+    for (auto &atom : lay.lat_vec.atoms) {
+      debugStream << "\t\tatom: " << atom.first << ", " << atom.second << std::endl;
+    }
+    debugStream << "\tValid: " << lay.lat_vec.isValid() << std::endl;
+  }
+
   layers.push_back(lay);
   debugStream << "Retrieved layer " << lay.name << " of type " << lay.type << std::endl;
 }
