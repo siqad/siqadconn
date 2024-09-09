@@ -264,10 +264,10 @@ namespace phys{
     float charge;   // contained electron charge
     float eps_r, lambda_tf; // relative permittivity and screening length for this fixed charge
     Defect(float t_x, float t_y, float t_z, float t_charge, float t_eps_r, float t_lambda_tf)
-      : has_eucl(true), has_lat_coord(false), x(t_x), y(t_y), z(t_z), charge(t_charge), eps_r(t_eps_r),
+      : has_lat_coord(false), has_eucl(true), x(t_x), y(t_y), z(t_z), charge(t_charge), eps_r(t_eps_r),
         lambda_tf(t_lambda_tf) {};
     Defect(int t_n, int t_m, int t_l, int t_w, int t_h, float t_charge, float t_eps_r, float t_lambda_tf)
-      : has_eucl(false), has_lat_coord(true), n(t_n), m(t_m), l(t_l), w(t_w), h(t_h), charge(t_charge),
+      : has_lat_coord(true), n(t_n), m(t_m), l(t_l), w(t_w), h(t_h), has_eucl(false), charge(t_charge),
         eps_r(t_eps_r), lambda_tf(t_lambda_tf) {};
   };
 
