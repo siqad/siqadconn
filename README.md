@@ -77,3 +77,14 @@ from siqadtools import siqadconn
 
 See [ExhaustiveGS](https://github.com/samuelngsh/exhaustive-gs-sidb) and [PoisSolvers](https://github.com/NathanChiu/PoisSolvers) for some usage examples of SiQADConnector in Python projects.
 
+
+Native callers can transfer export vectors with `setExport(type, std::move(data))`.
+The existing lvalue overloads and Python exports still copy their input.
+An explicit `writeResultsXml()` always writes. After a successful write, destruction
+writes again only if exports, commands, or the output path changed. Clients that
+never write explicitly retain automatic output on destruction. Write failures keep
+output pending and retain the existing exception behavior.
+
+Rebuild native clients with this library because the connector class layout changed.
+For native regression tests, configure with `-DBUILD_TESTING=ON`, build, and run
+`ctest --test-dir <build-directory> --output-on-failure`.

@@ -9,6 +9,7 @@
 #include "siqadconn.h"
 #include <iostream>
 #include <stdexcept>
+#include <utility>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/algorithm/string/join.hpp>
@@ -45,7 +46,7 @@ SiQADConnector::SiQADConnector(const std::string &eng_name,
 
 SiQADConnector::~SiQADConnector()
 {
-  if (output_path != "")
+  if (output_path != "" && !results_written)
     writeResultsXml();
 }
 
@@ -59,6 +60,7 @@ void SiQADConnector::setExport(std::string type, std::vector< std::pair< std::st
     throw std::invalid_argument(std::string("No candidate for export type '") +
         type + std::string("' with class std::vector<std::pair<std::string, std::string>>"));
   }
+  results_written = false;
 }
 
 void SiQADConnector::setExport(std::string type, std::vector< std::vector< std::string > > &data_in)
@@ -74,11 +76,42 @@ void SiQADConnector::setExport(std::string type, std::vector< std::vector< std::
   else
     throw std::invalid_argument(std::string("No candidate for export type '") +
         type + std::string("' with class std::vector<std::vector<std::string>>"));
+  results_written = false;
+}
+
+void SiQADConnector::setExport(std::string type, std::vector< std::pair< std::string, std::string > > &&data_in)
+{
+  if (type == "db_loc") {
+    dbl_data = std::move(data_in);
+  } else if (type == "misc") {
+    misc_data = std::move(data_in);
+  } else {
+    throw std::invalid_argument(std::string("No candidate for export type '") +
+        type + std::string("' with class std::vector<std::pair<std::string, std::string>>"));
+  }
+  results_written = false;
+}
+
+void SiQADConnector::setExport(std::string type, std::vector< std::vector< std::string > > &&data_in)
+{
+  if (type == "potential")
+    pot_data = std::move(data_in);
+  else if (type == "electrodes")
+    elec_data = std::move(data_in);
+  else if (type == "db_pot")
+    db_pot_data = std::move(data_in);
+  else if (type == "db_charge")
+    db_charge_data = std::move(data_in);
+  else
+    throw std::invalid_argument(std::string("No candidate for export type '") +
+        type + std::string("' with class std::vector<std::vector<std::string>>"));
+  results_written = false;
 }
 
 void SiQADConnector::addSQCommand(SQCommand *command)
 {
   export_commands.push_back(command->finalCommand());
+  results_written = false;
   debugStream << "Command added to SiQADConnector: " << std::endl;
   debugStream << export_commands.back() << std::endl;
 }
@@ -94,7 +127,7 @@ void SiQADConnector::readProblem(const std::string &path)
   boost::property_tree::ptree tree; // create empty property tree object
   boost::property_tree::read_xml(path, tree, boost::property_tree::xml_parser::no_comments); // parse the input file into property tree
 
-  boost::property_tree::ptree siqad_tree = tree.get_child("siqad");
+  const boost::property_tree::ptree &siqad_tree = tree.get_child("siqad");
 
   // parse XML
 
@@ -397,7 +430,9 @@ void SiQADConnector::writeResultsXml()
   if (output_path == "")
     throw std::invalid_argument("Output path not set.");
 
-  boost::property_tree::ptree node_root;
+  results_written = false;
+  boost::property_tree::ptree tree;
+  boost::property_tree::ptree &node_root = tree.add_child("sim_out", boost::property_tree::ptree());
 
   debugStream << "Write results to XML..." << std::endl;
 
@@ -438,9 +473,9 @@ void SiQADConnector::writeResultsXml()
   }
 
   // write full tree to file
-  boost::property_tree::ptree tree;
-  tree.add_child("sim_out", node_root);
   boost::property_tree::write_xml(output_path, tree, std::locale(), boost::property_tree::xml_writer_make_settings<std::string>(' ',4));
+
+  results_written = true;
 
   debugStream << "Write to XML complete." << std::endl;
 }

@@ -77,3 +77,11 @@ else()
     set_property(TARGET siqadconn PROPERTY CXX_STANDARD_REQUIRED True)
 endif()
 
+
+include(CTest)
+if(BUILD_TESTING AND NOT SKBUILD)
+    add_executable(siqadconn_xml_io_test tests/xml_io_test.cc)
+    target_link_libraries(siqadconn_xml_io_test siqadconn)
+    set_property(TARGET siqadconn_xml_io_test PROPERTY CXX_STANDARD 11)
+    add_test(NAME siqadconn_xml_io COMMAND siqadconn_xml_io_test ${CMAKE_CURRENT_BINARY_DIR})
+endif()
