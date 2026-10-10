@@ -76,6 +76,12 @@ namespace phys{
     void setExport(std::string type, std::vector< std::pair< std::string, std::string > > &data_in);
     void setExport(std::string type, std::vector< std::vector< std::string > > &data_in);
 
+#ifndef SWIG
+    // Native callers can transfer exports. Python keeps the copying overloads.
+    void setExport(std::string type, std::vector< std::pair< std::string, std::string > > &&data_in);
+    void setExport(std::string type, std::vector< std::vector< std::string > > &&data_in);
+#endif
+
     // Add SQCommand export
     void addSQCommand(SQCommand *);
 
@@ -114,7 +120,7 @@ namespace phys{
     // Misc Accessors
     std::string inputPath(){return input_path;}
 
-    void setOutputPath(std::string path){output_path = path;}
+    void setOutputPath(std::string path){output_path = path; results_written = false;}
     std::string outputPath(){return output_path;}
 
   private:
@@ -180,6 +186,7 @@ namespace phys{
     std::vector< std::pair<std::string, std::string> > misc_data; // misc data output that is ignored by SiQAD, first string for element name and second string for value
 
     // Runtime information
+    bool results_written = false;
     bool verbose;
     int return_code=0;
     std::chrono::time_point<std::chrono::system_clock> start_time;
