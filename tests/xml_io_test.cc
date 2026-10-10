@@ -50,6 +50,7 @@ int main(int argc, char **argv) {
     check(tree.get_child("sim_out").size() == 8);
     check(read(output).find("x=\"1&amp;2\"") != std::string::npos);
     sentinel(output);
+    conn.setOutputPath(output);
   }
   check(read(output) == "sentinel");
   {

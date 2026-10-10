@@ -120,7 +120,9 @@ namespace phys{
     // Misc Accessors
     std::string inputPath(){return input_path;}
 
-    void setOutputPath(std::string path){output_path = path; results_written = false;}
+    void setOutputPath(std::string path){
+      if (output_path != path) { output_path = path; results_written = false; }
+    }
     std::string outputPath(){return output_path;}
 
   private:
