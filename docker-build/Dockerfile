@@ -1,63 +1,26 @@
-# Resources:
-# Good consolidated guide on required components: https://thomastrapp.com/blog/building-a-pypi-package-for-a-modern-cpp-project/
-# Project that uses pypa/manylinux and CIs for cross platform compilation: moderngl/moderngl
+# Ubuntu 24.04 is the supported Linux wheel baseline (glibc 2.39).
+FROM ubuntu:24.04 AS build
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates build-essential cmake libboost-dev python3-dev python3-venv swig patchelf \
+    && rm -rf /var/lib/apt/lists/*
+RUN python3 -m venv /opt/build-venv
+ENV PATH="/opt/build-venv/bin:$PATH"
+# The fixed digest authenticates pip even if the original trust store is stale.
+RUN python -m pip --disable-pip-version-check install --no-deps --upgrade "https://files.pythonhosted.org/packages/3f/06/3e4420302363fbb71be3c7f35ce042f54bfca330e3e66b3a2e3c4cca579f/pip-26.2.2-py3-none-any.whl#sha256=fd7f4dfa8190e014013b9f08f3e973f4e4c26ffd179a204895533a7254813a70"
+# Use patched bundled roots rather than inheriting stale native trust.
+ENV PIP_USE_DEPRECATED=legacy-certs PIP_DISABLE_PIP_VERSION_CHECK=1
+RUN python -m pip install "certifi>=2026.10.19" scikit-build setuptools wheel auditwheel
+WORKDIR /build
+COPY siqadtools-*.tar.gz /tmp/siqadtools.tar.gz
+RUN tar --strip-components=1 -xzf /tmp/siqadtools.tar.gz
+RUN cmake -S . -B /tmp/cpp-tests -DBUILD_TESTING=ON \
+    && cmake --build /tmp/cpp-tests --parallel 2 \
+    && ctest --test-dir /tmp/cpp-tests --output-on-failure
+RUN python setup.py bdist_wheel \
+    && auditwheel repair --plat manylinux_2_39_$(uname -m) dist/*.whl -w /wheelhouse
+RUN python -m pip install --no-index --no-deps /wheelhouse/*.whl \
+    && python -c "from siqadtools import siqadconn"
 
-FROM dockcross/manylinux1-x64:latest as build_x86_64
-
-# no need to compile cmake from source as dockcross/manylinux1 provides a fairly new version
-
-# download and compile Boost 1.72.0
-RUN yum -y install libicu libicu-devel
-RUN curl -L0 'https://dl.bintray.com/boostorg/release/1.72.0/source/boost_1_72_0.tar.gz' > boost_1_72_0.tar.gz
-RUN tar -xzf boost_1_72_0.tar.gz
-RUN cd boost_1_72_0 && ./bootstrap.sh && ./b2 -j24 --with-system cxxflags="-fPIC" runtime-link=static variant=release link=static install
-
-# download and compile SWIG 3.0.12
-RUN yum -y install pcre pcre-devel
-RUN curl -L0 'https://sourceforge.net/projects/swig/files/swig/swig-3.0.12/swig-3.0.12.tar.gz/download' > swig-3.0.12.tar.gz
-RUN tar -xzf swig-3.0.12.tar.gz
-RUN cd swig-3.0.12 && ./configure --disable-perl --disable-ruby --disable-csharp --disable-r --disable-java && make -j24 && make install
-
-# unpack siqadtools and compile a wheel for each available Python version
-COPY siqadtools-*.tar.gz siqadtools.tar.gz
-#RUN tar --strip-components=1 -zxvf siqadtools.tar.gz
-RUN tar -zxvf siqadtools.tar.gz
-#RUN ls /opt/python/
-RUN /opt/python/cp35-cp35m/bin/python setup.py bdist_wheel && auditwheel repair dist/*.whl && rm dist/*.whl
-RUN /opt/python/cp36-cp36m/bin/python setup.py bdist_wheel && auditwheel repair dist/*.whl && rm dist/*.whl
-RUN /opt/python/cp37-cp37m/bin/python setup.py bdist_wheel && auditwheel repair dist/*.whl && rm dist/*.whl
-RUN /opt/python/cp38-cp38/bin/python setup.py bdist_wheel && auditwheel repair dist/*.whl && rm dist/*.whl
-RUN mkdir /wheelhouse && cp wheelhouse/* /wheelhouse/
-
-
-FROM dockcross/manylinux1-x86:latest as build_i686
-
-# download and compile Boost 1.72.0
-RUN yum -y install libicu libicu-devel
-RUN curl -L0 'https://dl.bintray.com/boostorg/release/1.72.0/source/boost_1_72_0.tar.gz' > boost_1_72_0.tar.gz
-RUN tar -xzf boost_1_72_0.tar.gz
-RUN cd boost_1_72_0 && ./bootstrap.sh && ./b2 -j24 --with-system cxxflags="-fPIC" runtime-link=static variant=release link=static install
-
-# download and compile SWIG 3.0.12
-RUN yum -y install pcre pcre-devel
-RUN curl -L0 'https://sourceforge.net/projects/swig/files/swig/swig-3.0.12/swig-3.0.12.tar.gz/download' > swig-3.0.12.tar.gz
-RUN tar -xzf swig-3.0.12.tar.gz
-RUN cd swig-3.0.12 && ./configure --disable-perl --disable-ruby --disable-csharp --disable-r --disable-java && make -j24 && make install
-
-# unpack siqadtools and compile a wheel for each available Python version
-COPY siqadtools-*.tar.gz siqadtools.tar.gz
-#RUN tar --strip-components=1 -zxvf siqadtools.tar.gz
-RUN tar -zxvf siqadtools.tar.gz
-#RUN ls /opt/python/
-RUN /opt/python/cp35-cp35m/bin/python setup.py bdist_wheel && auditwheel repair dist/*.whl && rm dist/*.whl
-RUN /opt/python/cp36-cp36m/bin/python setup.py bdist_wheel && auditwheel repair dist/*.whl && rm dist/*.whl
-RUN /opt/python/cp37-cp37m/bin/python setup.py bdist_wheel && auditwheel repair dist/*.whl && rm dist/*.whl
-RUN /opt/python/cp38-cp38/bin/python setup.py bdist_wheel && auditwheel repair dist/*.whl && rm dist/*.whl
-RUN mkdir /wheelhouse && cp wheelhouse/* /wheelhouse/
-
-
-FROM python:3.7.3
-# RUN pip install -U twine
-COPY --from=build_x86_64 /wheelhouse/* dist/
-COPY --from=build_i686 /wheelhouse/* dist/
-# CMD python -m twine upload dist/*
+FROM scratch AS wheels
+COPY --from=build /wheelhouse/ /dist/

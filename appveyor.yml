@@ -1,10 +1,10 @@
 version: '0.2.2.{build}'
 
 image:
-  - Visual Studio 2017
+  - Visual Studio 2022
 environment:
 
-  BOOST_ROOT: C:\Libraries\boost_1_69_0
+  BOOST_ROOT: C:\Libraries\boost_1_87_0
 
   matrix:
 
@@ -13,22 +13,14 @@ environment:
     # The list here is complete (excluding Python 2.6, which
     # isn't covered by this document) at the time of writing.
 
-    - PYTHON: "C:\\Python35"
-      DIST_N: sqconn_cp35-win32
-    - PYTHON: "C:\\Python36"
-      DIST_N: sqconn_cp36-win32
-    - PYTHON: "C:\\Python37"
-      DIST_N: sqconn_cp37-win32
-    - PYTHON: "C:\\Python38"
-      DIST_N: sqconn_cp38-win32
-    - PYTHON: "C:\\Python35-x64"
-      DIST_N: sqconn_cp35-win_amd64
-    - PYTHON: "C:\\Python36-x64"
-      DIST_N: sqconn_cp36-win_amd64
-    - PYTHON: "C:\\Python37-x64"
-      DIST_N: sqconn_cp37-win_amd64
-    - PYTHON: "C:\\Python38-x64"
-      DIST_N: sqconn_cp38-win_amd64
+    - PYTHON: "C:\\Python310"
+      DIST_N: sqconn_cp310-win32
+    - PYTHON: "C:\\Python310-x64"
+      DIST_N: sqconn_cp310-win_amd64
+    - PYTHON: "C:\\Python311"
+      DIST_N: sqconn_cp311-win32
+    - PYTHON: "C:\\Python311-x64"
+      DIST_N: sqconn_cp311-win_amd64
 
 cache:
   - C:\ProgramData\chocolatey\bin -> appveyor.yml
@@ -36,11 +28,14 @@ cache:
 
 install:
   - choco install swig ninja
-  - "%PYTHON%\\python.exe -m pip install scikit-build"
+  - '"%PYTHON%\python.exe" -m pip --disable-pip-version-check install --no-deps --upgrade "https://files.pythonhosted.org/packages/3f/06/3e4420302363fbb71be3c7f35ce042f54bfca330e3e66b3a2e3c4cca579f/pip-26.2.2-py3-none-any.whl#sha256=fd7f4dfa8190e014013b9f08f3e973f4e4c26ffd179a204895533a7254813a70"'
+  - '"%PYTHON%\python.exe" -m pip --disable-pip-version-check install --use-deprecated=legacy-certs "certifi>=2026.10.19" scikit-build'
 
 build_script:
   #- cd %APPVEYOR_BUILD_FOLDER%/libs/siqadconn
-  - "%PYTHON%\\python.exe setup.py test"
+  - cmake -S . -B build -DBUILD_TESTING=ON
+  - cmake --build build --config Release
+  - ctest --test-dir build -C Release --output-on-failure
     
 after_build:
   #- cd %APPVEYOR_BUILD_FOLDER%/libs/siqadconn

@@ -1,0 +1,22 @@
+name: Ubuntu 24.04 wheel
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+permissions:
+  contents: read
+jobs:
+  wheel:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare source archive
+        run: git archive --format=tar.gz --prefix=siqadtools-0.2.2/ --output=docker-build/siqadtools-0.2.2.tar.gz HEAD
+      - name: Build, repair, and import wheel
+        run: docker build -f docker-build/Dockerfile --output type=local,dest=wheel-output docker-build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ubuntu-24.04-cp312-wheel
+          path: wheel-output/dist/*.whl
+          if-no-files-found: error

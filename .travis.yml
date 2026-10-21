@@ -1,4 +1,7 @@
 language: python
+dist: jammy
+python:
+  - "3.10"
 services:
   - docker
 before_install:
@@ -6,8 +9,9 @@ before_install:
   - sudo add-apt-repository -y ppa:ubuntu-sdk-team/ppa
   - sudo apt-get update
   - sudo apt-get install -y zip swig cmake ninja-build libboost-dev
-  - pip3 install scikit-build
-  - python3 setup.py sdist -d docker-build
+  - python -m pip --disable-pip-version-check install --no-deps --upgrade "https://files.pythonhosted.org/packages/3f/06/3e4420302363fbb71be3c7f35ce042f54bfca330e3e66b3a2e3c4cca579f/pip-26.2.2-py3-none-any.whl#sha256=fd7f4dfa8190e014013b9f08f3e973f4e4c26ffd179a204895533a7254813a70"
+  - python -m pip --disable-pip-version-check install --use-deprecated=legacy-certs "certifi>=2026.10.19" scikit-build
+  - python setup.py sdist -d docker-build
   - docker build -t siqad/siqadtools docker-build
   - docker ps -a
 script:
