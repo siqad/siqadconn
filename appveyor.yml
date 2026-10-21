@@ -27,7 +27,10 @@ cache:
   - C:\ProgramData\chocolatey\lib -> appveyor.yml
 
 install:
-  - choco install swig ninja
+  - C:\Python310-x64\python.exe -m venv C:\siqad-build-tools
+  - 'C:\siqad-build-tools\Scripts\python.exe -m pip --disable-pip-version-check install --no-deps --upgrade "https://files.pythonhosted.org/packages/3f/06/3e4420302363fbb71be3c7f35ce042f54bfca330e3e66b3a2e3c4cca579f/pip-26.2.2-py3-none-any.whl#sha256=fd7f4dfa8190e014013b9f08f3e973f4e4c26ffd179a204895533a7254813a70"'
+  - 'C:\siqad-build-tools\Scripts\python.exe -m pip --disable-pip-version-check install --use-deprecated=legacy-certs --only-binary=:all: "certifi>=2026.10.19" "swig>=4.2,<5" ninja'
+  - set PATH=%PYTHON%;%PYTHON%\Scripts;C:\siqad-build-tools\Scripts;%PATH%
   - '"%PYTHON%\python.exe" -m pip --disable-pip-version-check install --no-deps --upgrade "https://files.pythonhosted.org/packages/3f/06/3e4420302363fbb71be3c7f35ce042f54bfca330e3e66b3a2e3c4cca579f/pip-26.2.2-py3-none-any.whl#sha256=fd7f4dfa8190e014013b9f08f3e973f4e4c26ffd179a204895533a7254813a70"'
   - '"%PYTHON%\python.exe" -m pip --disable-pip-version-check install --use-deprecated=legacy-certs "certifi>=2026.10.19" scikit-build'
 
