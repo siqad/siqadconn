@@ -11,4 +11,4 @@ cd "${script_path}"
 rm -rf dist
 ${PYTHON_PATH} setup.py bdist_wheel
 cd dist
-pip3 install --user siqadtools*.whl
+pip3 --disable-pip-version-check install --user --no-index --no-deps siqadtools*.whl

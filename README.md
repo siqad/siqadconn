@@ -88,3 +88,27 @@ output pending and retain the existing exception behavior.
 Rebuild native clients with this library because the connector class layout changed.
 For native regression tests, configure with `-DBUILD_TESTING=ON`, build, and run
 `ctest --test-dir <build-directory> --output-on-failure`.
+
+
+## Maintained package builds
+
+Package download tools require Python 3.10 or newer. The Windows build matrix
+uses Python 3.10 and 3.11, for both win32 and win_amd64. Linux container builds
+use Ubuntu 24.04, Python 3.12, and glibc 2.39. The Linux recipe no longer emits
+manylinux1 or i686 wheels. It emits a manylinux_2_39 wheel for its build
+architecture. Source package metadata remains unchanged.
+
+The eMudhra remediation bootstraps pip 26.2.2 from a fixed SHA256, then uses
+patched bundled certificates for dependency downloads. System-only private
+certificate authorities are not automatically included in these downloads.
+
+After creating the source archive in docker-build/, export the Linux wheels:
+
+```sh
+docker build --platform linux/amd64 -f docker-build/Dockerfile \
+  --output type=local,dest=wheel-output docker-build
+```
+
+The build verifies the repaired wheel by installing it without network access
+and importing its extension. Update the host/container certificate packages
+as part of normal maintenance as well.
